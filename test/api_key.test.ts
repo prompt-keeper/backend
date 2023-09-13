@@ -4,7 +4,13 @@ import app from "../src/app";
 describe("List api key", () => {
   it("return a list of keys", async () => {
     const response = await app
-      .handle(new Request("http://localhost/api_key/list"))
+      .handle(
+        new Request("http://localhost/api_key/list", {
+          headers: {
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+        }),
+      )
       .then((res) => res.json());
 
     const expected = {
@@ -22,6 +28,7 @@ describe("Create api key", () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
           body: JSON.stringify({ key_type: "write" }),
         }),

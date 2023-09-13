@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { UnauthorizedError } from "../errors/null_body_error";
 
 const CreateAPIKeyDTO = t.Object({
   key_type: t.String({
@@ -32,6 +33,19 @@ const delete_api_key = ({ id }: typeof DeleteAPIKeyDTO.static) => {
 };
 
 const api_key = new Elysia({ prefix: "/api_key" })
+  .onBeforeHandle(({ request, bearer }: any) => {
+    if (!bearer) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    // the bearer should match with the api_key in the database
+    //  or the master key
+    if (bearer === process.env.MASTER_KEY) {
+      return;
+    }
+
+    throw new UnauthorizedError("Unauthorized");
+  })
   .get("/list", list_api_key, {
     response: t.Object({
       keys: t.Array(t.String()),
