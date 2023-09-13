@@ -18,3 +18,40 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum ApiKeyType {
+  READ
+  WRITE
+  ADMIN
+}
+
+model ApiKey {
+  id             String       @id
+  name           String       @default("Default")
+  type           ApiKeyType   @default(READ)
+  createdAt      DateTime     @default(now())
+}
+
+//enum PromptType{
+//    Instruct
+//    GenImage
+//}
+
+model PromptVersion {
+  sha                String              @id
+  settings           Json                @default("{}")
+  content            String
+  promptId           String
+  prompt             Prompt              @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  createdAt          DateTime            @default(now())
+  message            String?
+}
+
+model Prompt {
+  id                 String              @id @default(cuid())
+  name               String
+  //type               PromptType
+  versions           PromptVersion[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
