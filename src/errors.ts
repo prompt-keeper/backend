@@ -10,4 +10,9 @@ class UnauthorizedError extends Error {
   }
 }
 
-export { NullBodyError, UnauthorizedError };
+class PrismaError extends Error {
+  constructor(public message: string) {
+    super(message);
+  }
+}
+export { NullBodyError, UnauthorizedError, PrismaError };

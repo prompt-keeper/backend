@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import app from "../src/app";
 import prisma from "../src/prisma";
 
@@ -167,4 +167,69 @@ describe("Create api key", () => {
 
   it.skip("return a new key with type read ", async () => {});
   it.skip("return error if key_type is not either `read` or `write`", async () => {});
+});
+
+describe("Delete api key", () => {
+  beforeEach(async () => {
+    console.log("Create sample keys");
+    // create 2 api keys
+    await prisma.apiKey.createMany({
+      data: [
+        {
+          id: "pk_1",
+          name: "key1",
+          type: "READ",
+        },
+        {
+          id: "pk_2",
+          name: "key2",
+          type: "WRITE",
+        },
+      ],
+    });
+  });
+  it("Delete a key with existing id", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api_key/delete/pk_1", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+        }),
+      )
+      .then((res) => {
+        return res.json();
+      });
+
+    const expected = {
+      message: "Deleted pk_1",
+    };
+    expect(response).toEqual(expected);
+
+    const keys = await prisma.apiKey.findMany();
+    expect(keys.length).toEqual(1);
+  });
+
+  it("return error if key_id is not found", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api_key/delete/pk_3", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+        }),
+      )
+      .then((res) => {
+        return res.json();
+      });
+
+    const expected = {
+      error: "Key not found",
+    };
+    expect(response).toEqual(expected);
+  });
 });

@@ -2,7 +2,7 @@ import bearer from "@elysiajs/bearer";
 import swagger from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
 import { Elysia, t } from "elysia";
-import { NullBodyError, UnauthorizedError } from "./errors/null_body_error";
+import { NullBodyError, UnauthorizedError, PrismaError } from "./errors";
 import api_key from "./routes/api_key";
 
 const app = new Elysia();
@@ -10,10 +10,21 @@ const app = new Elysia();
 app
   .use(cors({ origin: /\*.nguyentd.com$/ }))
   .use(bearer())
-  .use(swagger())
+  .use(
+    swagger({
+      path: "/docs",
+      documentation: {
+        info: {
+          title: "Prompt Keeper API Documentation",
+          version: "1.0.0",
+        },
+      },
+    }),
+  )
   .addError({
     NULL_BODY: NullBodyError,
     UNAUTHORIZED: UnauthorizedError,
+    PRISMA: PrismaError,
   })
   .onError(({ code, error, set }) => {
     switch (code) {
@@ -26,6 +37,11 @@ app
         // Error is typed as ValidationError
         return { error: error.message };
       case "NULL_BODY":
+        set.status = 400;
+        return {
+          error: error.message,
+        };
+      case "PRISMA":
         set.status = 400;
         return {
           error: error.message,

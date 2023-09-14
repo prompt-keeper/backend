@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { UnauthorizedError } from "../errors/null_body_error";
+import { PrismaError, UnauthorizedError } from "../errors";
 import { randomBytes } from "crypto";
 import prisma from "../prisma";
 
@@ -13,8 +13,8 @@ const CreateAPIKeyDTO = t.Object({
 });
 
 const DeleteAPIKeyDTO = t.Object({
-  id: t.String({
-    error: "ID is required",
+  key: t.String({
+    error: "key is required",
   }),
 });
 
@@ -54,9 +54,25 @@ const create_new_api_key = async ({
   };
 };
 
-const delete_api_key = ({ id }: typeof DeleteAPIKeyDTO.static) => {
+const delete_api_key = async ({ key }: typeof DeleteAPIKeyDTO.static) => {
+  const apiKey = await prisma.apiKey.findUnique({
+    where: {
+      id: key,
+    },
+  });
+
+  if (!apiKey) {
+    throw new PrismaError("Key not found");
+  }
+
+  await prisma.apiKey.delete({
+    where: {
+      id: key,
+    },
+  });
+
   return {
-    message: `Deleted ${id}`,
+    message: `Deleted ${key}`,
   };
 };
 
@@ -93,7 +109,7 @@ const api_key = new Elysia({ prefix: "/api_key" })
       type: t.String(),
     }),
   })
-  .delete("/delete/:id", ({ params }) => delete_api_key(params), {
+  .delete("/delete/:key", ({ params }) => delete_api_key(params), {
     params: DeleteAPIKeyDTO,
     response: t.Object({
       message: t.String(),

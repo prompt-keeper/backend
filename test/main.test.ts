@@ -1,13 +1,7 @@
-import {
-  describe,
-  expect,
-  it,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  afterAll,
-} from "bun:test";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
 import app from "../src/app";
+
+// TODO: only WRITE or ADMIN key can create a new key
 
 describe("Elysia", () => {
   it("return a response", async () => {
