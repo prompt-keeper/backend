@@ -1,8 +1,25 @@
 import { describe, expect, it } from "bun:test";
 import app from "../src/app";
+import prisma from "../src/prisma";
 
 describe("List api key", () => {
   it("return a list of keys", async () => {
+    // create 2 api keys
+    await prisma.apiKey.createMany({
+      data: [
+        {
+          id: "pk_1",
+          name: "key1",
+          type: "READ",
+        },
+        {
+          id: "pk_2",
+          name: "key2",
+          type: "WRITE",
+        },
+      ],
+    });
+
     const response = await app
       .handle(
         new Request("http://localhost/api_key/list", {
@@ -14,14 +31,25 @@ describe("List api key", () => {
       .then((res) => res.json());
 
     const expected = {
-      keys: ["key1", "key2"],
+      keys: [
+        {
+          key: "pk_1",
+          name: "key1",
+          type: "READ",
+        },
+        {
+          key: "pk_2",
+          name: "key2",
+          type: "WRITE",
+        },
+      ],
     };
     expect(response).toStrictEqual(expected);
   });
 });
 
 describe("Create api key", () => {
-  it("return a new key with type write ", async () => {
+  it("return a new key with type write", async () => {
     const response = await app
       .handle(
         new Request("http://localhost/api_key/create", {
@@ -30,16 +58,20 @@ describe("Create api key", () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
-          body: JSON.stringify({ key_type: "write" }),
+          body: JSON.stringify({ type: "WRITE", name: "test" }),
         }),
       )
-      .then((res) => res.json());
+      .then((res) => {
+        return res.json();
+      });
 
     const expected = {
-      key: "New key created",
-      key_type: "write",
+      name: "test",
+      type: "WRITE",
     };
-    expect(response).toEqual(expected);
+    expect(response.name).toEqual(expected.name);
+    expect(response.type).toEqual(expected.type);
+    expect(response.key).toMatch(/^pk_/);
   });
 
   it("return error if request with no key_type", async () => {
@@ -49,14 +81,62 @@ describe("Create api key", () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
-          body: JSON.stringify({}),
+          body: JSON.stringify({
+            name: "test",
+          }),
         }),
       )
       .then((res) => res.json());
 
     const expected = {
       error: "Key type is required",
+    };
+    expect(response).toEqual(expected);
+  });
+
+  it("return error if request with wrong key_type", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api_key/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+          body: JSON.stringify({
+            name: "test",
+            type: "write",
+          }),
+        }),
+      )
+      .then((res) => res.json());
+
+    const expected = {
+      error: "Key type is invalid",
+    };
+    expect(response.error).toEqual(expected.error);
+  });
+
+  it("return error if request with no name", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api_key/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+          body: JSON.stringify({
+            type: "READ",
+          }),
+        }),
+      )
+      .then((res) => res.json());
+
+    const expected = {
+      error: "Name is required",
     };
     expect(response).toEqual(expected);
   });
@@ -68,6 +148,7 @@ describe("Create api key", () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
         }),
       )

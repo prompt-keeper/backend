@@ -1,4 +1,12 @@
-import { describe, expect, it } from "bun:test";
+import {
+  describe,
+  expect,
+  it,
+  beforeAll,
+  beforeEach,
+  afterEach,
+  afterAll,
+} from "bun:test";
 import app from "../src/app";
 
 describe("Elysia", () => {
@@ -11,7 +19,15 @@ describe("Elysia", () => {
   });
 });
 
-describe("prompt keeper app", () => {
+describe("Authentication system", () => {
+  beforeAll(async () => {
+    // Initialize Prisma for testing (e.g., set up test database)
+    // Create test data
+  });
+  afterAll(async () => {
+    // Clean up Prisma (e.g., delete test database)
+  });
+
   it("all of protected API request must have a token", async () => {
     const response = await app
       .handle(new Request("http://localhost/api_key/list"))
@@ -32,6 +48,21 @@ describe("prompt keeper app", () => {
       )
       .then((res) => res.json());
     expect(response).not.toEqual({
+      error: "Unauthorized",
+    });
+  });
+
+  it("return unauthorized if access with wrong token", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api_key/list", {
+          headers: {
+            Authorization: "Bearer " + "wrong token",
+          },
+        }),
+      )
+      .then((res) => res.json());
+    expect(response).toEqual({
       error: "Unauthorized",
     });
   });
