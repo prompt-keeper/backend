@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import app from "../src/app";
 import prisma from "../src/prisma";
 
-const endpoint_url = "http://localhost/api_keys";
+const endpoint_url = "http://localhost/api-keys";
 
 describe("List api key", () => {
   it("return a list of keys", async () => {

@@ -9,7 +9,7 @@ import {
   InvalidPayloadError,
   error_handler,
 } from "./errors";
-import api_key from "./routes/api_keys";
+import apiKeyRoutes from "./routes/apiKeyRoutes";
 
 const app = new Elysia();
 
@@ -61,6 +61,6 @@ app
     },
   })
 
-  .use(api_key);
+  .use(apiKeyRoutes);
 
 export default app;
