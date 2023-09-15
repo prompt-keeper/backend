@@ -11,8 +11,12 @@ class UnauthorizedError extends Error {
 }
 
 class PrismaError extends Error {
-  constructor(public message: string) {
+  constructor(
+    public message: string,
+    public prismaCode: string = "PRISMA",
+  ) {
     super(message);
+    this.prismaCode = prismaCode;
   }
 }
 export { NullBodyError, UnauthorizedError, PrismaError };

@@ -3,7 +3,7 @@ import swagger from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
 import { Elysia, t } from "elysia";
 import { NullBodyError, UnauthorizedError, PrismaError } from "./errors";
-import api_key from "./routes/api_key";
+import api_key from "./routes/api_keys";
 
 const app = new Elysia();
 
@@ -42,7 +42,16 @@ app
           error: error.message,
         };
       case "PRISMA":
-        set.status = 400;
+        switch (error.prismaCode) {
+          case "P2025":
+            set.status = 404;
+            break;
+          case "P2002":
+            set.status = 409;
+            break;
+          default:
+            set.status = 500;
+        }
         return {
           error: error.message,
         };

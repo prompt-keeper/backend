@@ -24,7 +24,7 @@ describe("Authentication system", () => {
 
   it("all of protected API request must have a token", async () => {
     const response = await app
-      .handle(new Request("http://localhost/api_key/list"))
+      .handle(new Request("http://localhost/api_keys/list"))
       .then((res) => res.json());
     expect(response).toEqual({
       error: "Unauthorized",
@@ -34,7 +34,7 @@ describe("Authentication system", () => {
   it("masterkey should access to protected endpoint", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/list", {
+        new Request("http://localhost/api_keys/list", {
           headers: {
             Authorization: "Bearer " + process.env.MASTER_KEY,
           },
@@ -49,7 +49,7 @@ describe("Authentication system", () => {
   it("return unauthorized if access with wrong token", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/list", {
+        new Request("http://localhost/api_keys/list", {
           headers: {
             Authorization: "Bearer " + "wrong token",
           },

@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { PrismaError, UnauthorizedError } from "../errors";
 import { randomBytes } from "crypto";
 import prisma from "../prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const CreateAPIKeyDTO = t.Object({
   name: t.String({
@@ -55,28 +56,35 @@ const create_new_api_key = async ({
 };
 
 const delete_api_key = async ({ key }: typeof DeleteAPIKeyDTO.static) => {
-  const apiKey = await prisma.apiKey.findUnique({
-    where: {
-      id: key,
-    },
-  });
+  // const apiKey = await prisma.apiKey.findUnique({
+  //   where: {
+  //     id: key,
+  //   },
+  // });
 
-  if (!apiKey) {
-    throw new PrismaError("Key not found");
+  try {
+    await prisma.apiKey.delete({
+      where: {
+        id: key,
+      },
+    });
+  } catch (error) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        throw new PrismaError("Key not found", error.code);
+      }
+      throw new PrismaError(error.message, error.code);
+    }
+    // TODO: log error
+    throw Error("Internal server error");
   }
-
-  await prisma.apiKey.delete({
-    where: {
-      id: key,
-    },
-  });
 
   return {
     message: `Deleted ${key}`,
   };
 };
 
-const api_key = new Elysia({ prefix: "/api_key" })
+const api_key = new Elysia({ prefix: "/api_keys" })
   .onTransform(({ bearer }: any) => {
     if (!bearer) {
       throw new UnauthorizedError("Unauthorized");

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import app from "../src/app";
 import prisma from "../src/prisma";
 
+const endpoint_url = "http://localhost/api_keys";
+
 describe("List api key", () => {
   it("return a list of keys", async () => {
     // create 2 api keys
@@ -22,7 +24,7 @@ describe("List api key", () => {
 
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/list", {
+        new Request(`${endpoint_url}/list`, {
           headers: {
             Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
@@ -52,7 +54,7 @@ describe("Create api key", () => {
   it("return a new key with type write", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/create", {
+        new Request(`${endpoint_url}/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -77,7 +79,7 @@ describe("Create api key", () => {
   it("return error if request with no key_type", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/create", {
+        new Request(`${endpoint_url}/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -99,7 +101,7 @@ describe("Create api key", () => {
   it("return error if request with wrong key_type", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/create", {
+        new Request(`${endpoint_url}/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -122,7 +124,7 @@ describe("Create api key", () => {
   it("return error if request with no name", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/create", {
+        new Request(`${endpoint_url}/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -144,7 +146,7 @@ describe("Create api key", () => {
   it("return error if request with empty body", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/create", {
+        new Request(`${endpoint_url}/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -191,7 +193,7 @@ describe("Delete api key", () => {
   it("Delete a key with existing id", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/delete/pk_1", {
+        new Request(`${endpoint_url}/delete/pk_1`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -215,7 +217,7 @@ describe("Delete api key", () => {
   it("return error if key_id is not found", async () => {
     const response = await app
       .handle(
-        new Request("http://localhost/api_key/delete/pk_3", {
+        new Request(`${endpoint_url}/delete/pk_3`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -224,12 +226,14 @@ describe("Delete api key", () => {
         }),
       )
       .then((res) => {
-        return res.json();
+        return res;
       });
 
+    const responseJson = await response.json();
     const expected = {
       error: "Key not found",
     };
-    expect(response).toEqual(expected);
+    expect(responseJson.error).toEqual(expected.error);
+    expect(response.status).toEqual(404);
   });
 });
