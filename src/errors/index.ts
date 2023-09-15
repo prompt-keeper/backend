@@ -1,4 +1,12 @@
+import error_handler from "./error_handler";
+
 class NullBodyError extends Error {
+  constructor(public message: string) {
+    super(message);
+  }
+}
+
+class InvalidPayloadError extends Error {
   constructor(public message: string) {
     super(message);
   }
@@ -19,4 +27,11 @@ class PrismaError extends Error {
     this.prismaCode = prismaCode;
   }
 }
-export { NullBodyError, UnauthorizedError, PrismaError };
+
+export {
+  InvalidPayloadError,
+  NullBodyError,
+  PrismaError,
+  UnauthorizedError,
+  error_handler,
+};

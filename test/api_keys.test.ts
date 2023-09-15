@@ -35,12 +35,12 @@ describe("List api key", () => {
     const expected = {
       keys: [
         {
-          key: "pk_1",
+          id: "pk_1",
           name: "key1",
           type: "READ",
         },
         {
-          key: "pk_2",
+          id: "pk_2",
           name: "key2",
           type: "WRITE",
         },
@@ -73,7 +73,7 @@ describe("Create api key", () => {
     };
     expect(response.name).toEqual(expected.name);
     expect(response.type).toEqual(expected.type);
-    expect(response.key).toMatch(/^pk_/);
+    expect(response.id).toMatch(/^pk_/);
   });
 
   it("return error if request with no key_type", async () => {
@@ -167,8 +167,35 @@ describe("Create api key", () => {
     expect(response.status).toEqual(400);
   });
 
-  it.skip("return a new key with type read ", async () => {});
-  it.skip("return error if key_type is not either `read` or `write`", async () => {});
+  it("return error if key_type is not either `read` or `write`", async () => {
+    const response = await app
+      .handle(
+        new Request(`${endpoint_url}/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+          },
+          body: JSON.stringify({
+            type: "READING",
+            name: "test",
+          }),
+        }),
+      )
+      .then((res) => {
+        return res;
+      });
+
+    const responseJson = await response.json();
+
+    const expected = {
+      error: "Key type is invalid",
+    };
+
+    expect(responseJson).toEqual(expected);
+    expect(response.status).toEqual(400);
+  });
+  // it.skip("return a new key with type read ", async () => {});
 });
 
 describe("Delete api key", () => {
