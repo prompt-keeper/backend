@@ -1,5 +1,11 @@
 import error_handler from "./error_handler";
 
+class NotFoundError extends Error {
+  constructor(public message: string) {
+    super(message);
+  }
+}
+
 class NullBodyError extends Error {
   constructor(public message: string) {
     super(message);
@@ -30,6 +36,7 @@ class PrismaError extends Error {
 
 export {
   InvalidPayloadError,
+  NotFoundError,
   NullBodyError,
   PrismaError,
   UnauthorizedError,

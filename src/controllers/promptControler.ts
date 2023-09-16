@@ -1,4 +1,5 @@
-import prisma from "../prisma";
+import { NotFoundError } from "@/errors";
+import prisma from "@/prisma";
 
 const listPrompt = async () => {
   const prompts = await prisma.prompt.findMany({
@@ -10,45 +11,37 @@ const listPrompt = async () => {
   return { prompts };
 };
 
-const getPrompt = (body: { id: string } | { name: string }) => {
-  if ("id" in body && "name" in body) {
-    throw new Error("Invalid payload, cannot contain both id and name");
+const getPrompt = async (body: { id: string } | { name: string }) => {
+  // body should contain either id or name and not other fields
+  let found = false;
+  for (const key in body) {
+    if (key !== "id" && key !== "name") {
+      // If any property other than "id" or "name" is found, return false
+      throw new Error("Invalid payload");
+    }
+    found = true;
   }
 
-  if ("id" in body) {
-    return getPromptById(body.id);
+  if (!found) {
+    // if there is no id or name in the body
+    throw new Error("Invalid payload");
   }
 
-  if ("name" in body) {
-    return getPromptByName(body.name);
-  }
-  throw new Error("Invalid payload");
-};
-
-const getPromptById = async (id: string) => {
   const prompt = await prisma.prompt.findUnique({
     where: {
-      id,
+      ...body,
     },
     select: {
       id: true,
       name: true,
     },
   });
+
+  if (!prompt) {
+    throw new NotFoundError("No prompt found");
+  }
+
   return prompt;
 };
 
-const getPromptByName = async (name: string) => {
-  const prompt = await prisma.prompt.findUnique({
-    where: {
-      name,
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
-  return prompt;
-};
-
-export default { listPrompt, getPromptById, getPromptByName, getPrompt };
+export default { listPrompt, getPrompt };

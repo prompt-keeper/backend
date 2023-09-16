@@ -55,7 +55,8 @@ describe("Get one single prompt", () => {
             Authorization: `Bearer ${process.env.MASTER_KEY}`,
           },
           body: JSON.stringify({
-            id1: "pk_1",
+            id: "pk_1",
+            name1: "prompt 1",
           }),
         }),
       )
@@ -66,7 +67,8 @@ describe("Get one single prompt", () => {
     };
     expect(response.error).toEqual(expected.error);
   });
-  it("prompts: response error if payload containd both id and name", async () => {
+
+  it("prompts: if payload containd both id and name, and there is a prompt match with it", async () => {
     const response = await app
       .handle(
         new Request(`${endpoint_url}/find`, {
@@ -83,9 +85,38 @@ describe("Get one single prompt", () => {
       )
       .then((res) => res.json());
 
-    const expected = {
-      error: "Invalid payload",
-    };
-    expect(response.error).toStartWith(expected.error);
+    expect(response).toHaveProperty("name");
+    expect(response.name).toBe("prompt 1");
+    expect(response.id).toBe("pk_1");
+    // const expected = {
+    //   error: "Invalid payload",
+    // };
+    // expect(response.error).toStartWith(expected.error);
+  });
+
+  it("prompts: if payload containd both id and name, and there is no prompt match with it", async () => {
+    const response = await app.handle(
+      new Request(`${endpoint_url}/find`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.MASTER_KEY}`,
+        },
+        body: JSON.stringify({
+          id: "pk_1",
+          name: "prompt 2",
+        }),
+      }),
+    );
+
+    console.log(response);
+    const responseJson = await response.json();
+    expect(responseJson).toHaveProperty("error");
+    expect(responseJson.error).toBe("No prompt found");
+    expect(response.status).toBe(404);
+    // const expected = {
+    //   error: "Invalid payload",
+    // };
+    // expect(response.error).toStartWith(expected.error);
   });
 });

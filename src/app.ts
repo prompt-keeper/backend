@@ -8,6 +8,7 @@ import {
   PrismaError,
   InvalidPayloadError,
   error_handler,
+  NotFoundError,
 } from "@/errors";
 import apiKeyRoutes from "@/routes/apiKeyRoutes";
 import promptRoutes from "@/routes/promptRoutes";
@@ -33,6 +34,7 @@ app
     UNAUTHORIZED: UnauthorizedError,
     PRISMA: PrismaError,
     INVALID_PAYLOAD: InvalidPayloadError,
+    NOT_FOUND: NotFoundError,
   })
   .onError(error_handler)
   .onParse(({ request }, contentType) => {
