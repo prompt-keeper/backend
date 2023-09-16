@@ -8,8 +8,9 @@ import {
   PrismaError,
   InvalidPayloadError,
   error_handler,
-} from "./errors";
-import apiKeyRoutes from "./routes/apiKeyRoutes";
+} from "@/errors";
+import apiKeyRoutes from "@/routes/apiKeyRoutes";
+import promptRoutes from "@/routes/promptRoutes";
 
 const app = new Elysia();
 
@@ -61,6 +62,7 @@ app
     },
   })
 
-  .use(apiKeyRoutes);
+  .use(apiKeyRoutes)
+  .use(promptRoutes);
 
 export default app;

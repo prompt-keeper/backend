@@ -32,11 +32,6 @@ model ApiKey {
   createdAt      DateTime     @default(now())
 }
 
-//enum PromptType{
-//    Instruct
-//    GenImage
-//}
-
 model PromptVersion {
   sha                String              @id
   settings           Json                @default("{}")
@@ -49,8 +44,7 @@ model PromptVersion {
 
 model Prompt {
   id                 String              @id @default(cuid())
-  name               String
-  //type               PromptType
+  name               String              @unique
   versions           PromptVersion[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
