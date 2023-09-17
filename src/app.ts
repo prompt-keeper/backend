@@ -26,6 +26,15 @@ app
           title: "Prompt Keeper API Documentation",
           version: "1.0.0",
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }],
       },
     }),
   )

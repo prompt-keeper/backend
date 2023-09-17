@@ -16,7 +16,6 @@ Open http://localhost:3000/ with your browser to see the result.
 
 
 ## TODO
-- [ ] Swagger config to have authentication field
 - [ ] Prompts api endpoint
   - GET /prompts : Get all prompts (or 10 per page)
   - POST /prompts/find: Find 1 prompt by name or id
