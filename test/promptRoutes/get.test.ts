@@ -91,10 +91,7 @@ describe("GetPrompt: get one single prompt", () => {
         .handle(validRequest(`${endpoint_url}/find`, { body: payload }))
         .then((res) => res.json());
 
-      const expected = {
-        error: "Invalid payload",
-      };
-      expect(response.error).toEqual(expected.error);
+      expect(response.error).toStartWith("Invalid body");
     },
   );
 });

@@ -1,6 +1,7 @@
 import {
   CreatePromptBody,
   CreatePromptResponse,
+  FindPromptBody,
   UpdatePromptBody,
 } from "@/dtos/promptsDTO";
 import { NotFoundError, PrismaError } from "@/errors";
@@ -18,25 +19,20 @@ const listPrompt = async () => {
   return { prompts };
 };
 
-const getPrompt = async (body: { id: string } | { name: string }) => {
+const getPrompt = async (body: typeof FindPromptBody.static) => {
   // body should contain either id or name and not other fields
-  let found = false;
-  for (const key in body) {
-    if (key !== "id" && key !== "name") {
-      // If any property other than "id" or "name" is found, return false
-      throw new Error("Invalid payload");
-    }
-    found = true;
-  }
-
-  if (!found) {
+  if (!body.id && !body.name) {
     // if there is no id or name in the body
-    throw new Error("Invalid payload");
+    throw new Error("Invalid body");
   }
 
+  const query = {
+    id: body.id,
+    name: body.name,
+  };
   const prompt = await prisma.prompt.findUnique({
     where: {
-      ...body,
+      ...query,
     },
     select: {
       id: true,

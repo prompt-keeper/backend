@@ -1,13 +1,13 @@
 import { Elysia } from "elysia";
-import apiKeyController from "../controllers/apiKeyController";
+import apiKeyController from "@/controllers/apiKeyController";
 import {
   CreateAPIKeyBody,
   CreateAPIKeyResponse,
   DeleteAPIKeyParams,
   ListAPIKeyResponse,
   SimpleResponse,
-} from "../dtos/apiKeysDTO";
-import authGuard from "../authGuard";
+} from "@/dtos/apiKeysDTO";
+import authGuard from "@/authGuard";
 
 const apiKeyRoutes = new Elysia({ prefix: "/api-keys" })
   .onTransform(authGuard)

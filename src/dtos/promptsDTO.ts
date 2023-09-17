@@ -9,6 +9,12 @@ const ListPromptResponse = t.Object({
   ),
 });
 
+// t.Union appears to by not working
+const FindPromptBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+});
+
 const CreatePromptBody = t.Object({
   name: t.String(),
   content: t.String(),
@@ -31,4 +37,5 @@ export {
   CreatePromptBody,
   CreatePromptResponse,
   UpdatePromptBody,
+  FindPromptBody,
 };

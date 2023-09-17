@@ -9,7 +9,7 @@ describe("Elysia", () => {
       .handle(new Request("http://localhost/"))
       .then((res) => res.text());
 
-    expect(response).toBe("Hello Elysia");
+    expect(response).toStartWith("Hello from Prompt Keeper API");
   });
 });
 

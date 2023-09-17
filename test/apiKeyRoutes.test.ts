@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import app from "../src/app";
-import prisma from "../src/prisma";
+import app from "@/app";
+import prisma from "@/prisma";
 import { validRequest } from "./utils";
 
 const endpoint_url = "http://localhost/api-keys";

@@ -1,7 +1,7 @@
 import bearer from "@elysiajs/bearer";
 import swagger from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import {
   NullBodyError,
   UnauthorizedError,
@@ -55,25 +55,8 @@ app
       throw new NullBodyError("Request body is required");
     }
   })
-  .get("/", () => "Hello Elysia")
-
-  .post("/sign-in", ({ body }) => body, {
-    body: t.Object(
-      {
-        username: t.String(),
-        password: t.String(),
-      },
-      {
-        description: "Expected an username and password",
-      },
-    ),
-    detail: {
-      summary: "Sign in the user",
-      tags: ["authentication"],
-    },
-  })
-
-  .use(apiKeyRoutes)
-  .use(promptRoutes);
+  .get("/", () => "Hello from Prompt Keeper API ❤️")
+  .use(promptRoutes)
+  .use(apiKeyRoutes);
 
 export default app;
