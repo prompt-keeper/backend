@@ -16,10 +16,10 @@ Open http://localhost:3000/ with your browser to see the result.
 
 
 ## TODO
+- [ ] Swagger config to have authentication field
 - [ ] Prompts api endpoint
   - GET /prompts : Get all prompts (or 10 per page)
-  - GET /prompts/:id : Get prompt by id
-  - GET /prompts/:name : Get prompt by name
+  - POST /prompts/find: Find 1 prompt by name or id
   - POST /prompts : Create a new prompt, including creating a prompt version and prompt version content
   - PUT /prompts/:id : Update a prompt, what actually happens is a new prompt version is created and the prompt is updated to point to the new version
   - DELETE /prompts/:id : Delete a prompt and its versions

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import app from "../src/app";
 import prisma from "../src/prisma";
+import { validRequest } from "./utils";
 
 const endpoint_url = "http://localhost/api-keys";
 
@@ -23,13 +24,7 @@ describe("List api key", () => {
     });
 
     const response = await app
-      .handle(
-        new Request(`${endpoint_url}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-        }),
-      )
+      .handle(validRequest(`${endpoint_url}`, { method: "GET" }))
       .then((res) => res.json());
 
     const expected = {
@@ -50,17 +45,15 @@ describe("List api key", () => {
   });
 });
 
-describe("Create api key", () => {
+describe("APIKeyCreate: Create api key", () => {
   it("return a new key with type write", async () => {
     const response = await app
       .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
+        validRequest(`${endpoint_url}`, {
+          body: {
+            type: "WRITE",
+            name: "test",
           },
-          body: JSON.stringify({ type: "WRITE", name: "test" }),
         }),
       )
       .then((res) => {
@@ -79,16 +72,11 @@ describe("Create api key", () => {
   it("return error if request with no key_type", async () => {
     const response = await app
       .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-          body: JSON.stringify({
-            name: "test",
-          }),
-        }),
+        validRequest(
+          `${endpoint_url}`,
+
+          { body: { name: "test" } },
+        ),
       )
       .then((res) => res.json());
 
@@ -101,16 +89,8 @@ describe("Create api key", () => {
   it("return error if request with wrong key_type", async () => {
     const response = await app
       .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-          body: JSON.stringify({
-            name: "test",
-            type: "write",
-          }),
+        validRequest(`${endpoint_url}`, {
+          body: { name: "test", type: "write" },
         }),
       )
       .then((res) => res.json());
@@ -124,16 +104,11 @@ describe("Create api key", () => {
   it("return error if request with no name", async () => {
     const response = await app
       .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-          body: JSON.stringify({
-            type: "READ",
-          }),
-        }),
+        validRequest(
+          `${endpoint_url}`,
+
+          { body: { type: "WRITE" } },
+        ),
       )
       .then((res) => res.json());
 
@@ -143,43 +118,39 @@ describe("Create api key", () => {
     expect(response).toEqual(expected);
   });
 
-  it("return error if request with empty body", async () => {
-    const response = await app
-      .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-        }),
-      )
-      .then((res) => {
-        return res;
-      });
+  it.each([{}, undefined])(
+    "return error if request with empty body",
+    async (payload) => {
+      const response = await app
+        .handle(
+          validRequest(
+            `${endpoint_url}`,
 
-    const responseJson = await response.json();
+            { body: payload },
+          ),
+        )
+        .then((res) => {
+          return res;
+        });
 
-    const expected = {
-      error: "Request body is required",
-    };
-    expect(responseJson).toEqual(expected);
-    expect(response.status).toEqual(400);
-  });
+      const responseJson = await response.json();
+
+      const errors = [
+        "Request body is required",
+        "Key type is required",
+        "Name is required",
+      ];
+
+      expect(errors).toContain(responseJson.error);
+      expect(response.status).toEqual(400);
+    },
+  );
 
   it("return error if key_type is not either `read` or `write`", async () => {
     const response = await app
       .handle(
-        new Request(`${endpoint_url}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-          body: JSON.stringify({
-            type: "READING",
-            name: "test",
-          }),
+        validRequest(`${endpoint_url}`, {
+          body: { type: "invalid", name: "test" },
         }),
       )
       .then((res) => {
@@ -219,15 +190,7 @@ describe("Delete api key", () => {
   });
   it("Delete a key with existing id", async () => {
     const response = await app
-      .handle(
-        new Request(`${endpoint_url}/pk_1`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-        }),
-      )
+      .handle(validRequest(`${endpoint_url}/pk_1`, { method: "DELETE" }))
       .then((res) => {
         return res.json();
       });
@@ -243,15 +206,7 @@ describe("Delete api key", () => {
 
   it("return error if key_id is not found", async () => {
     const response = await app
-      .handle(
-        new Request(`${endpoint_url}/pk_3`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-        }),
-      )
+      .handle(validRequest(`${endpoint_url}/pk_3`, { method: "DELETE" }))
       .then((res) => {
         return res;
       });

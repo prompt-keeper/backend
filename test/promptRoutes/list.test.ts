@@ -1,23 +1,18 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import app from "@/app";
 import createSamplePrompts from "./createSamplePrompts";
+import { validRequest } from "test/utils";
 
 const endpoint_url = "http://localhost/prompts";
 
-describe("Get list of prompts", () => {
+describe("GetPrompts: get list of prompts", () => {
   beforeEach(async () => {
     await createSamplePrompts();
   });
 
-  it("prompts: return a list of prompts", async () => {
+  it("return a list of prompts", async () => {
     const response = await app
-      .handle(
-        new Request(`${endpoint_url}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.MASTER_KEY}`,
-          },
-        }),
-      )
+      .handle(validRequest(`${endpoint_url}`, { method: "GET" }))
       .then((res) => res.json());
 
     expect(response.prompts).toHaveLength(3);

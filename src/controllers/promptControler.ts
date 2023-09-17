@@ -1,5 +1,7 @@
-import { NotFoundError } from "@/errors";
+import { CreatePromptBody, CreatePromptResponse } from "@/dtos/promptsDTO";
+import { NotFoundError, PrismaError } from "@/errors";
 import prisma from "@/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const listPrompt = async () => {
   const prompts = await prisma.prompt.findMany({
@@ -44,4 +46,45 @@ const getPrompt = async (body: { id: string } | { name: string }) => {
   return prompt;
 };
 
-export default { listPrompt, getPrompt };
+const createPrompt = async (
+  body: typeof CreatePromptBody.static,
+): Promise<typeof CreatePromptResponse.static> => {
+  try {
+    const prompt = await prisma.prompt.create({
+      data: {
+        ...body,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    return prompt;
+  } catch (e) {
+    if (e instanceof PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        throw new PrismaError("Name already exists", e.code);
+      }
+    }
+    throw Error("Unknown error");
+  }
+};
+
+const updatePrompt = async (body) => {
+  const prompt = await prisma.prompt.update({
+    where: {
+      id: body.id,
+    },
+    data: {
+      ...body,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+  return prompt;
+};
+
+export default { listPrompt, getPrompt, createPrompt, updatePrompt };

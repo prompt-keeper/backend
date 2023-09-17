@@ -9,4 +9,13 @@ const ListPromptResponse = t.Object({
   ),
 });
 
-export { ListPromptResponse };
+const CreatePromptBody = t.Object({
+  name: t.String(),
+});
+
+const CreatePromptResponse = t.Object({
+  id: t.String(),
+  name: t.String(),
+});
+
+export { ListPromptResponse, CreatePromptBody, CreatePromptResponse };
