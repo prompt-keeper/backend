@@ -5,8 +5,10 @@ import {
   CreatePromptBody,
   CreatePromptResponse,
   FindPromptBody,
+  FindPromptResponse,
   ListPromptResponse,
   UpdatePromptBody,
+  UpdatePromptResponse,
 } from "@/dtos/promptsDTO";
 
 const promptRoutes = new Elysia({ prefix: "/prompts" })
@@ -14,6 +16,7 @@ const promptRoutes = new Elysia({ prefix: "/prompts" })
   .get("/", promptControler.listPrompt, { response: ListPromptResponse })
   .post("/find", ({ body }) => promptControler.getPrompt(body as any), {
     body: FindPromptBody,
+    response: FindPromptResponse,
   })
   .post("/", ({ body }) => promptControler.createPrompt(body), {
     body: CreatePromptBody,
@@ -21,5 +24,6 @@ const promptRoutes = new Elysia({ prefix: "/prompts" })
   })
   .put("/", ({ body }) => promptControler.updatePrompt(body), {
     body: UpdatePromptBody,
+    response: UpdatePromptResponse,
   });
 export default promptRoutes;

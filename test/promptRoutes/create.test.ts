@@ -8,26 +8,15 @@ const endpoint_url = "http://localhost/prompts";
 const invalidPayloads = [
   {},
   { name: 111 },
-  {
-    name: "prompt 1",
-  },
-  {
-    content: "content 1",
-  },
-  {
-    name: "prompt 1",
-    id: "pk_1",
-    content: "content 1",
-  },
-  {
-    name1: "prompt 1",
-    content: "content 1",
-  },
+  { name: "prompt 1" },
+  { content: "content 1" },
+  { name: "prompt 1", id: "pk_1", content: "content 1" },
+  { name1: "prompt 1", content: "content 1" },
 ];
 
 describe("CreatePrompt", () => {
   beforeEach(async () => {
-    // create 2 sample prompts
+    // create 3 sample prompts
     await createSamplePrompts();
   });
   it("should create new prompt with valid input", async () => {
@@ -51,7 +40,7 @@ describe("CreatePrompt", () => {
       .handle(
         validRequest(`${endpoint_url}/`, {
           body: {
-            name: "prompt 1",
+            name: "prompt1",
             content: "content 1",
           },
         }),

@@ -41,18 +41,18 @@ describe("GetPrompt: get one single prompt", () => {
       )
       .then((res) => res.json());
     expect(response).toHaveProperty("name");
-    expect(response.name).toBe("prompt 1");
+    expect(response.name).toBe("prompt1");
   });
 
   it("get prompt by name", async () => {
     const response = await app
       .handle(
-        validRequest(`${endpoint_url}/find`, { body: { name: "prompt 1" } }),
+        validRequest(`${endpoint_url}/find`, { body: { name: "prompt1" } }),
       )
       .then((res) => res.json());
 
     expect(response).toHaveProperty("name");
-    expect(response.name).toBe("prompt 1");
+    expect(response.name).toBe("prompt1");
     expect(response.id).toBe("pk_1");
   });
 
@@ -60,13 +60,13 @@ describe("GetPrompt: get one single prompt", () => {
     const response = await app
       .handle(
         validRequest(`${endpoint_url}/find`, {
-          body: { id: "pk_1", name: "prompt 1" },
+          body: { id: "pk_1", name: "prompt1" },
         }),
       )
       .then((res) => res.json());
 
     expect(response).toHaveProperty("name");
-    expect(response.name).toBe("prompt 1");
+    expect(response.name).toBe("prompt1");
     expect(response.id).toBe("pk_1");
   });
 
@@ -94,4 +94,15 @@ describe("GetPrompt: get one single prompt", () => {
       expect(response.error).toStartWith("Invalid body");
     },
   );
+
+  it("get prompt should have latest version", async () => {
+    const response = await app
+      .handle(
+        validRequest(`${endpoint_url}/find`, { body: { name: "prompt3" } }),
+      )
+      .then((res) => res.json());
+
+    expect(response).toHaveProperty("content");
+    expect(response.content).toBe("content 3.2");
+  });
 });

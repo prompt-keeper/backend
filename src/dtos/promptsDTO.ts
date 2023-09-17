@@ -15,6 +15,13 @@ const FindPromptBody = t.Object({
   name: t.Optional(t.String()),
 });
 
+const FindPromptResponse = t.Object({
+  id: t.String(),
+  name: t.String(),
+  sha: t.Optional(t.String()),
+  content: t.Optional(t.String()),
+});
+
 const CreatePromptBody = t.Object({
   name: t.String(),
   content: t.String(),
@@ -28,8 +35,16 @@ const CreatePromptResponse = t.Object({
 });
 
 const UpdatePromptBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+  content: t.Optional(t.String()),
+});
+
+const UpdatePromptResponse = t.Object({
   id: t.String(),
-  content: t.String(),
+  name: t.String(),
+  sha: t.Optional(t.String()),
+  content: t.Optional(t.String()),
 });
 
 export {
@@ -38,4 +53,6 @@ export {
   CreatePromptResponse,
   UpdatePromptBody,
   FindPromptBody,
+  FindPromptResponse,
+  UpdatePromptResponse,
 };

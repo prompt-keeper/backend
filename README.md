@@ -17,11 +17,11 @@ Open http://localhost:3000/ with your browser to see the result.
 
 ## TODO
 - [ ] Prompts api endpoint
-  - GET /prompts : Get all prompts (or 10 per page)
-  - POST /prompts/find: Find 1 prompt by name or id
-  - POST /prompts : Create a new prompt, including creating a prompt version and prompt version content
-  - PUT /prompts/:id : Update a prompt, what actually happens is a new prompt version is created and the prompt is updated to point to the new version
+  - [x] GET /prompts : Get all prompts (or 10 per page)
+  - [x] POST /prompts/find: Find 1 prompt by name or id
+  - [x] POST /prompts : Create a new prompt, including creating a prompt version and prompt version content
+  - [x] PUT /prompts/:id : Update a prompt, what actually happens is a new prompt version is created
   - DELETE /prompts/:id : Delete a prompt and its versions
   - DELETE /prompts/:id/versions : roll back to a previous version of a prompt
   - GET /prompts/:id/versions : Get prompt version history by prompt id
-  - GET /prompts/:id/versions/:hash : Get prompt version by prompt id and version hash
+  - GET /prompts/:id/versions/:sha : Get prompt version by prompt id and version hash
