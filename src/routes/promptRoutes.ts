@@ -1,10 +1,11 @@
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 import authGuard from "@/authGuard";
 import promptControler from "@/controllers/promptControler";
 import {
   CreatePromptBody,
   CreatePromptResponse,
   ListPromptResponse,
+  UpdatePromptBody,
 } from "@/dtos/promptsDTO";
 
 const promptRoutes = new Elysia({ prefix: "/prompts" })
@@ -15,5 +16,7 @@ const promptRoutes = new Elysia({ prefix: "/prompts" })
     body: CreatePromptBody,
     response: CreatePromptResponse,
   })
-  .put("/", ({ body }) => promptControler.updatePrompt(body));
+  .put("/", ({ body }) => promptControler.updatePrompt(body), {
+    body: UpdatePromptBody,
+  });
 export default promptRoutes;

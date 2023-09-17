@@ -1,7 +1,12 @@
-import { CreatePromptBody, CreatePromptResponse } from "@/dtos/promptsDTO";
+import {
+  CreatePromptBody,
+  CreatePromptResponse,
+  UpdatePromptBody,
+} from "@/dtos/promptsDTO";
 import { NotFoundError, PrismaError } from "@/errors";
 import prisma from "@/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import crypto from "crypto";
 
 const listPrompt = async () => {
   const prompts = await prisma.prompt.findMany({
@@ -50,14 +55,48 @@ const createPrompt = async (
   body: typeof CreatePromptBody.static,
 ): Promise<typeof CreatePromptResponse.static> => {
   try {
-    const prompt = await prisma.prompt.create({
-      data: {
-        ...body,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
+    const prompt = await prisma.$transaction(async (tx) => {
+      // 1. create prompt
+      const prompt = await tx.prompt.create({
+        data: {
+          name: body.name,
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      // 2.create sha for prompt version
+
+      // Create a new SHA-256 hash object
+      const sha256 = crypto.createHash("sha256");
+
+      const sha = sha256
+        .update(
+          `${JSON.stringify({ content: body.content })}-${
+            prompt.id
+          }-${Date.now()}`,
+        )
+        .digest("hex");
+
+      // 3. create prompt version
+      const version = await tx.promptVersion.create({
+        data: {
+          sha,
+          promptId: prompt.id,
+          content: body.content,
+        },
+        select: {
+          sha: true,
+          content: true,
+        },
+      });
+
+      return {
+        ...prompt,
+        ...version,
+      };
     });
 
     return prompt;
@@ -71,7 +110,11 @@ const createPrompt = async (
   }
 };
 
-const updatePrompt = async (body) => {
+const updatePrompt = async (body: typeof UpdatePromptBody.static) => {
+  // there would be 3 cases:
+  // 1. update prompt name
+  // 2. update prompt content
+  // 3. or both name and content
   const prompt = await prisma.prompt.update({
     where: {
       id: body.id,
