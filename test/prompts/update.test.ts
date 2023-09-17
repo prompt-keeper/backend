@@ -60,7 +60,7 @@ describe("UpdatePrompt", () => {
       )
       .then((res) => res.json());
 
-    console.log(response);
+    // console.log(response);
 
     expect(response).toHaveProperty("id");
     expect(response).toHaveProperty("name", "Updated Name");
@@ -119,7 +119,7 @@ describe("UpdatePrompt", () => {
         }),
       )
       .then((res) => res.json());
-    console.log(response);
+    // console.log(response);
     expect(response).toHaveProperty("id");
     expect(response).toHaveProperty("name", "Updated Name");
     expect(response).toHaveProperty("content", "New Content");

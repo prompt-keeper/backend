@@ -3,6 +3,8 @@ import {
   CreatePromptResponse,
   FindPromptBody,
   FindPromptResponse,
+  LogPromptBody,
+  LogPromptResponse,
   UpdatePromptBody,
   UpdatePromptResponse,
 } from "@/dtos/promptsDTO";
@@ -244,4 +246,44 @@ const updatePrompt = async (
   return updatedPrompt;
 };
 
-export default { listPrompt, getPrompt, createPrompt, updatePrompt };
+const getPromptHistories = async ({
+  id,
+  name,
+  number,
+}: typeof LogPromptBody.static): Promise<typeof LogPromptResponse.static> => {
+  if (!id && !name) {
+    throw new Error("Invalid body");
+  }
+
+  const condition: { promptId?: string; prompt?: { name: string } } = {};
+  if (id) {
+    condition.promptId = id;
+  }
+  if (name) {
+    condition.prompt = { name };
+  }
+
+  const n = number === -1 ? undefined : number || 5;
+  const versions = await prisma.promptVersion.findMany({
+    where: condition,
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: n,
+    select: {
+      sha: true,
+      content: true,
+      createdAt: true,
+    },
+  });
+
+  return { histories: versions };
+};
+
+export default {
+  listPrompt,
+  getPrompt,
+  createPrompt,
+  updatePrompt,
+  getPromptHistories,
+};

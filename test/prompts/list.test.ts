@@ -28,7 +28,7 @@ describe("GetPrompts: get list of prompts", () => {
       .then((res) => res.json());
 
     expect(response.prompts).toHaveLength(3);
-    console.log(response.prompts);
+    // console.log(response.prompts);
     for (const prompt of response.prompts) {
       expect(prompt).toHaveProperty("name");
       expect(["prompt1", "prompt2", "prompt3"]).toContain(prompt.name);

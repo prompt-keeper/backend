@@ -47,6 +47,22 @@ const UpdatePromptResponse = t.Object({
   content: t.Optional(t.String()),
 });
 
+const LogPromptBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+  number: t.Optional(t.Number()),
+});
+
+const LogPromptResponse = t.Object({
+  histories: t.Array(
+    t.Object({
+      sha: t.String(),
+      content: t.String(),
+      createdAt: t.Date(),
+    }),
+  ),
+});
+
 export {
   ListPromptResponse,
   CreatePromptBody,
@@ -55,4 +71,6 @@ export {
   FindPromptBody,
   FindPromptResponse,
   UpdatePromptResponse,
+  LogPromptBody,
+  LogPromptResponse,
 };

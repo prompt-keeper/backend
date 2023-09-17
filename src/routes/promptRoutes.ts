@@ -7,6 +7,8 @@ import {
   FindPromptBody,
   FindPromptResponse,
   ListPromptResponse,
+  LogPromptBody,
+  LogPromptResponse,
   UpdatePromptBody,
   UpdatePromptResponse,
 } from "@/dtos/promptsDTO";
@@ -25,5 +27,10 @@ const promptRoutes = new Elysia({ prefix: "/prompts" })
   .put("/", ({ body }) => promptControler.updatePrompt(body), {
     body: UpdatePromptBody,
     response: UpdatePromptResponse,
+  })
+  .post("/log", ({ body }) => promptControler.getPromptHistories(body), {
+    body: LogPromptBody,
+    response: LogPromptResponse,
   });
+
 export default promptRoutes;
