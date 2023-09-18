@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import {
   CreatePromptBody,
   CreatePromptResponse,
@@ -17,7 +18,7 @@ import {
 import { NotFoundError, PrismaError } from "@/errors";
 import prisma from "@/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import crypto from "crypto";
+import { getCache, setCache, deleteCache } from "@/redis";
 
 const createSHA256Hash = ({ id, content }: { id: string; content: string }) => {
   const sha256 = crypto.createHash("sha256");
@@ -72,6 +73,15 @@ const getPrompt = async (
     id: body.id,
     name: body.name,
   };
+
+  const key =
+    body.id && body.name ? `${body.id}-${body.name}` : query.id || query.name;
+
+  const cachedResult = await getCache(key || "");
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   const prompt = await prisma.prompt.findUnique({
     where: query,
 
@@ -105,6 +115,9 @@ const getPrompt = async (
         }
       : {}),
   };
+
+  await setCache(key || "", result);
+
   return result;
 };
 
@@ -237,6 +250,12 @@ const updatePrompt = async (
 
     // Update prompt version if content is provided and either id or name is provided
     const version = await createPromptVersion(prisma, p.id, body.content);
+
+    // delete cache
+    await deleteCache(`${p.id}-${p.name}`);
+    await deleteCache(`${p.id}`);
+    await deleteCache(`${p.name}`);
+
     return {
       ...p,
       ...version,
@@ -248,6 +267,11 @@ const updatePrompt = async (
   }
   // Update prompt name if no content is provided
   const updatedPrompt = await updatePromptName(prisma, p.id, body.name);
+  // delete cache
+  await deleteCache(`${p.id}-${p.name}`);
+  await deleteCache(`${p.id}`);
+  await deleteCache(`${p.name}`);
+
   return updatedPrompt;
 };
 
@@ -289,11 +313,9 @@ const getPromptVersion = async ({
   id,
   name,
   sha,
-}: {
-  id?: string;
-  name?: string;
-  sha?: string;
-}) => {
+}: typeof FindVersionBody.static): Promise<
+  typeof FindVersionResponse.static
+> => {
   if ((!id && !name) || !sha) {
     throw new Error("Invalid body");
   }
@@ -312,31 +334,6 @@ const getPromptVersion = async ({
 
   const version = await prisma.promptVersion.findUnique({
     where: condition,
-    select: {
-      sha: true,
-      content: true,
-      createdAt: true,
-    },
-  });
-
-  if (!version) {
-    throw new NotFoundError("No prompt found");
-  }
-
-  return version;
-};
-
-const getPromptVersionByName = async ({
-  name,
-  sha,
-}: typeof FindVersionBody.static): Promise<
-  typeof FindVersionResponse.static
-> => {
-  const version = await prisma.promptVersion.findUnique({
-    where: {
-      sha,
-      prompt: { name },
-    },
     select: {
       sha: true,
       content: true,
@@ -405,6 +402,11 @@ const revertPromptVersion = async ({
     },
   });
 
+  // delete cache
+  await deleteCache(`${prompt.id}-${prompt.name}`);
+  await deleteCache(`${prompt.id}`);
+  await deleteCache(`${prompt.name}`);
+
   return previousVersion;
 };
 
@@ -426,19 +428,25 @@ const deletePrompt = async ({
 
   // delete
   try {
-    const deteledPrompt = await prisma.prompt.delete({
+    const deletedPrompt = await prisma.prompt.delete({
       where: condition,
       select: {
         id: true,
         name: true,
       },
     });
-    if (!deteledPrompt) {
+    if (!deletedPrompt) {
       return {
         message: "Prompt cannot be deleted",
         status: "error",
       };
     }
+
+    // delete cache
+    await deleteCache(`${deletedPrompt.id}-${deletePrompt.name}`);
+    await deleteCache(`${deletedPrompt.id}`);
+    await deleteCache(`${deletedPrompt.name}`);
+
     return {
       message: "Prompt deleted successfully",
       status: "success",
@@ -460,7 +468,6 @@ export default {
   updatePrompt,
   getPromptHistories,
   getPromptVersion,
-  getPromptVersionByName,
   revertPromptVersion,
   deletePrompt,
 };

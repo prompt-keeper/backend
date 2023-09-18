@@ -25,4 +25,6 @@ Open http://localhost:3000/ with your browser to see the result.
   - [x] POST /prompts/findVersion : Get prompt version by prompt (id or name) and version hash
   - [x] POST /prompts/revert : roll back to a previous version of a prompt, it could be revert by 1 version or to a specific version by sha
   - [x] POST /prompts/delete : Delete a prompt and its versions
-- [ ] Redis integration
+- [x] Redis integration
+  - [x] cache prompt to minimize the number of times we need to query the database
+  - [x] delete cache when new prompt version is created / revert ...

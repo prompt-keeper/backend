@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "scripts": {
     "test": "bun test --preload ./test/helpers/setup.ts",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down -v"
   },
   "dependencies": {
     "@elysiajs/bearer": "^0.6.0",
@@ -11,7 +13,8 @@
     "@elysiajs/swagger": "^0.6.2",
     "@prisma/client": "5.2.0",
     "elysia": "latest",
-    "prisma": "^5.2.0"
+    "prisma": "^5.2.0",
+    "redis": "^4.6.8"
   },
   "devDependencies": {
     "bun-types": "latest"

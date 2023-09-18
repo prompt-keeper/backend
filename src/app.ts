@@ -12,9 +12,9 @@ import {
 } from "@/errors";
 import apiKeyRoutes from "@/routes/apiKeyRoutes";
 import promptRoutes from "@/routes/promptRoutes";
+import redis from "./redis";
 
 const app = new Elysia();
-
 app
   .use(cors({ origin: /\*.nguyentd.com$/ }))
   .use(bearer())
@@ -54,6 +54,9 @@ app
     ) {
       throw new NullBodyError("Request body is required");
     }
+  })
+  .onStop(async () => {
+    await redis.quit();
   })
   .get("/", () => "Hello from Prompt Keeper API ❤️")
   .use(promptRoutes)

@@ -22,7 +22,7 @@ import {
 const promptRoutes = new Elysia({ prefix: "/prompts" })
   .onTransform(authGuard)
   .get("/", promptControler.listPrompt, { response: ListPromptResponse })
-  .post("/find", ({ body }) => promptControler.getPrompt(body as any), {
+  .post("/find", ({ body }) => promptControler.getPrompt(body), {
     body: FindPromptBody,
     response: FindPromptResponse,
   })

@@ -1,14 +1,24 @@
 version: "3.8"
 services:
   postgres:
-    image: postgres:10.3
+    image: postgres:16.0
+    container_name: prompt-keeper-db
     restart: always
     environment:
-      - POSTGRES_USER=sammy
-      - POSTGRES_PASSWORD=your_password
+      POSTGRES_USER: db_admin
+      POSTGRES_PASSWORD: db_password
+      POSTGRES_DB: prompt-keeper-db
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  redis:
+    image: redis:latest
+    container_name: prompt-keeper-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 volumes:
   postgres:
+  redis_data:

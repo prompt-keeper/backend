@@ -6,7 +6,7 @@ import { validRequest } from "./utils";
 const endpoint_url = "http://localhost/api-keys";
 
 describe("List api key", () => {
-  it("return a list of keys", async () => {
+  it("return  list of keys", async () => {
     // create 2 api keys
     await prisma.apiKey.createMany({
       data: [
