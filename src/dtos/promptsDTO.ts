@@ -63,6 +63,38 @@ const LogPromptResponse = t.Object({
   ),
 });
 
+const FindVersionBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+  sha: t.String(),
+});
+const FindVersionResponse = t.Object({
+  sha: t.String(),
+  content: t.String(),
+  createdAt: t.Date(),
+});
+
+const RevertVersionBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+});
+
+const RevertVersionResponse = t.Object({
+  sha: t.String(),
+  content: t.String(),
+  createdAt: t.Date(),
+});
+
+const DeletePromptBody = t.Object({
+  id: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+});
+
+const DeletePromptResponse = t.Object({
+  message: t.String(),
+  status: t.String(),
+});
+
 export {
   ListPromptResponse,
   CreatePromptBody,
@@ -73,4 +105,10 @@ export {
   UpdatePromptResponse,
   LogPromptBody,
   LogPromptResponse,
+  FindVersionBody,
+  FindVersionResponse,
+  RevertVersionBody,
+  RevertVersionResponse,
+  DeletePromptBody,
+  DeletePromptResponse,
 };

@@ -4,11 +4,17 @@ import promptControler from "@/controllers/promptControler";
 import {
   CreatePromptBody,
   CreatePromptResponse,
+  DeletePromptBody,
+  DeletePromptResponse,
   FindPromptBody,
   FindPromptResponse,
+  FindVersionBody,
+  FindVersionResponse,
   ListPromptResponse,
   LogPromptBody,
   LogPromptResponse,
+  RevertVersionBody,
+  RevertVersionResponse,
   UpdatePromptBody,
   UpdatePromptResponse,
 } from "@/dtos/promptsDTO";
@@ -31,6 +37,17 @@ const promptRoutes = new Elysia({ prefix: "/prompts" })
   .post("/log", ({ body }) => promptControler.getPromptHistories(body), {
     body: LogPromptBody,
     response: LogPromptResponse,
+  })
+  .post("/findVersion", ({ body }) => promptControler.getPromptVersion(body), {
+    body: FindVersionBody,
+    response: FindVersionResponse,
+  })
+  .post("/revert", ({ body }) => promptControler.revertPromptVersion(body), {
+    body: RevertVersionBody,
+    response: RevertVersionResponse,
+  })
+  .post("/delete", ({ body }) => promptControler.deletePrompt(body), {
+    body: DeletePromptBody,
+    response: DeletePromptResponse,
   });
-
 export default promptRoutes;

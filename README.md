@@ -22,7 +22,7 @@ Open http://localhost:3000/ with your browser to see the result.
   - [x] POST /prompts : Create a new prompt, including creating a prompt version and prompt version content
   - [x] PUT /prompts/:id : Update a prompt, what actually happens is a new prompt version is created
   - [x] POST /prompts/log : Get prompt version histories by prompt id
-  - [ ] GET /prompts/:id/versions/:sha : Get prompt version by prompt id and version hash
-  - [ ] POST /prompts/revert : roll back to a previous version of a prompt, it could be revert by 1 version or to a specific version by sha
-  - [ ] DELETE /prompts/:id : Delete a prompt and its versions
+  - [x] POST /prompts/findVersion : Get prompt version by prompt (id or name) and version hash
+  - [x] POST /prompts/revert : roll back to a previous version of a prompt, it could be revert by 1 version or to a specific version by sha
+  - [x] POST /prompts/delete : Delete a prompt and its versions
 - [ ] Redis integration

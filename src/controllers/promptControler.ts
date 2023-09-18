@@ -1,10 +1,16 @@
 import {
   CreatePromptBody,
   CreatePromptResponse,
+  DeletePromptBody,
+  DeletePromptResponse,
   FindPromptBody,
   FindPromptResponse,
+  FindVersionBody,
+  FindVersionResponse,
   LogPromptBody,
   LogPromptResponse,
+  RevertVersionBody,
+  RevertVersionResponse,
   UpdatePromptBody,
   UpdatePromptResponse,
 } from "@/dtos/promptsDTO";
@@ -67,9 +73,8 @@ const getPrompt = async (
     name: body.name,
   };
   const prompt = await prisma.prompt.findUnique({
-    where: {
-      ...query,
-    },
+    where: query,
+
     select: {
       id: true,
       name: true,
@@ -280,10 +285,182 @@ const getPromptHistories = async ({
   return { histories: versions };
 };
 
+const getPromptVersion = async ({
+  id,
+  name,
+  sha,
+}: {
+  id?: string;
+  name?: string;
+  sha?: string;
+}) => {
+  if ((!id && !name) || !sha) {
+    throw new Error("Invalid body");
+  }
+
+  const condition: {
+    promptId?: string;
+    prompt?: { name: string };
+    sha: string;
+  } = { sha };
+  if (id) {
+    condition.promptId = id;
+  }
+  if (name) {
+    condition.prompt = { name };
+  }
+
+  const version = await prisma.promptVersion.findUnique({
+    where: condition,
+    select: {
+      sha: true,
+      content: true,
+      createdAt: true,
+    },
+  });
+
+  if (!version) {
+    throw new NotFoundError("No prompt found");
+  }
+
+  return version;
+};
+
+const getPromptVersionByName = async ({
+  name,
+  sha,
+}: typeof FindVersionBody.static): Promise<
+  typeof FindVersionResponse.static
+> => {
+  const version = await prisma.promptVersion.findUnique({
+    where: {
+      sha,
+      prompt: { name },
+    },
+    select: {
+      sha: true,
+      content: true,
+      createdAt: true,
+    },
+  });
+
+  if (!version) {
+    throw new NotFoundError("No prompt found");
+  }
+
+  return version;
+};
+
+const revertPromptVersion = async ({
+  id,
+  name,
+}: typeof RevertVersionBody.static): Promise<
+  typeof RevertVersionResponse.static
+> => {
+  // prompt only has one version, return error
+  // else delete the latest version and return the previous version
+
+  if (!id && !name) {
+    // if there is no id or name in the body
+    throw new Error("Invalid body");
+  }
+
+  const condition = {
+    id,
+    name,
+  };
+
+  const prompt = await prisma.prompt.findUnique({
+    where: condition,
+    select: {
+      id: true,
+      name: true,
+      versions: {
+        select: {
+          sha: true,
+          content: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 2,
+      },
+    },
+  });
+
+  if (!prompt) {
+    throw new NotFoundError("No prompt found");
+  }
+
+  if (prompt.versions.length === 1) {
+    throw new Error("Cannot revert prompt with only one version");
+  }
+
+  const [latestVersion, previousVersion] = prompt.versions;
+
+  await prisma.promptVersion.delete({
+    where: {
+      sha: latestVersion.sha,
+    },
+  });
+
+  return previousVersion;
+};
+
+const deletePrompt = async ({
+  id,
+  name,
+}: typeof DeletePromptBody.static): Promise<
+  typeof DeletePromptResponse.static
+> => {
+  if (!id && !name) {
+    // if there is no id or name in the body
+    throw new Error("Invalid body");
+  }
+
+  const condition = {
+    id,
+    name,
+  };
+
+  // delete
+  try {
+    const deteledPrompt = await prisma.prompt.delete({
+      where: condition,
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+    if (!deteledPrompt) {
+      return {
+        message: "Prompt cannot be deleted",
+        status: "error",
+      };
+    }
+    return {
+      message: "Prompt deleted successfully",
+      status: "success",
+    };
+  } catch (e) {
+    if (e instanceof PrismaClientKnownRequestError) {
+      if (e.code === "P2025") {
+        throw new PrismaError("Prompt does not exist", e.code);
+      }
+    }
+    throw Error("Unknown error");
+  }
+};
+
 export default {
   listPrompt,
   getPrompt,
   createPrompt,
   updatePrompt,
   getPromptHistories,
+  getPromptVersion,
+  getPromptVersionByName,
+  revertPromptVersion,
+  deletePrompt,
 };
